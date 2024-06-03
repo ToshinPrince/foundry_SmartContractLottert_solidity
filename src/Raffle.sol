@@ -122,8 +122,8 @@ contract Raffle is VRFConsumerBaseV2 {
         emit RequestFulfilled(_requestId, _randomWords);
     } */
 
-    function fulfillRandomWorgs(
-        uint256 _requestId,
+    function fulfillRandomWords(
+        uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
