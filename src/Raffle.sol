@@ -37,6 +37,11 @@ contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughETHSend();
     error Raffle__TransferFailed();
     error Raffle__RaffleNotOpen();
+    error Raffle__UpkeepNotNeeded(
+        uint256 currentBalance,
+        uint256 numPlayer,
+        uint256 RaffleState
+    );
 
     /*Type Declaration**/
     enum RaffleState {
@@ -125,18 +130,31 @@ contract Raffle is VRFConsumerBaseV2 {
         bool boolTimeHasPassed = (block.timestamp - s_lastTimeStamp) >=
             i_interval;
         bool isOpen = RaffleState.OPEN == s_raffleState;
-        bool hasETH = address(this).balance > 0;
+        bool hasBalance = address(this).balance > 0;
         bool hasPlayers = s_players.length > 0;
 
-        upkeepNeeded = (boolTimeHasPassed && isOpen && hasETH && hasPlayers);
+        upkeepNeeded = (boolTimeHasPassed &&
+            isOpen &&
+            hasBalance &&
+            hasPlayers);
+
         return (upkeepNeeded, "0x0");
     }
 
-    function pickWinner() external {
-        //Check to see if enough time has passed
-        if ((block.timestamp - s_lastTimeStamp) < i_interval) {
-            revert();
+    function performUpkeep(bytes calldata /* performData */) external {
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_raffleState)
+            );
         }
+
+        //Check to see if enough time has passed
+        // if ((block.timestamp - s_lastTimeStamp) < i_interval) {
+        //     revert();
+        // }
         // 1) Request the RNG(Random NUmber Generator) -> Chainlink
         // 2) Get the Random NUmber
         //This code is taken from chainlink docs(Get a ramdom Number). https://docs.chain.link/vrf/v2/subscription/examples/get-a-random-number
