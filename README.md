@@ -84,3 +84,11 @@ $ forge --help
 $ anvil --help
 $ cast --help
 ```
+
+## TEST
+
+1. Write some Deploy Script
+2. Write our tests
+   1. Work on local chain.
+   2. Forked Testnet.
+   3. Forked Mainnet.
