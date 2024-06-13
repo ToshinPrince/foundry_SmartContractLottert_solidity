@@ -9,7 +9,8 @@ import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoord
 contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() public returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
-        (, , address vrfCoordinator, , , ) = helperConfig.activeNetworkConfig();
+        (, , address vrfCoordinator, , , , ) = helperConfig
+            .activeNetworkConfig();
         return createSubscription(vrfCoordinator);
     }
 
@@ -22,7 +23,7 @@ contract CreateSubscription is Script {
             .createSubscription();
         vm.stopBroadcast();
 
-        console.log("Your SunId si:", subId);
+        console.log("Your SubId si:", subId);
         console.log("Please update subscriptonId in helperConfig.s.sol");
         return subId;
     }
@@ -37,8 +38,29 @@ contract FundSubscription is Script {
 
     function fundSubscriptionUsingConfig() public {
         HelperConfig helperConfig = new HelperConfig();
-        (, , address vrfCoordinator, , uint64 subscriptionId, ) = helperConfig
-            .activeNetworkConfig();
+        (
+            ,
+            ,
+            address vrfCoordinator,
+            ,
+            uint64 subscriptionId,
+            ,
+            address link
+        ) = helperConfig.activeNetworkConfig();
+
+        fundSubscription(vrfCoordinator, subscriptionId, link);
+    }
+
+    function fundSubscription(
+        address vrfCoordinator,
+        uint64 subscriptionId,
+        address link
+    ) public {
+        console.log("fund subscription:", subscriptionId);
+        console.log("Using vrfCoordinator", vrfCoordinator);
+        console.log("On chainId", block.chainid);
+
+        if (block.chainid == 31337) {}
     }
 
     function run() external {
