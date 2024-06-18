@@ -45,8 +45,8 @@ contract Raffle is VRFConsumerBaseV2 {
 
     /*Type Declaration**/
     enum RaffleState {
-        OPEN,
-        CALCULATING
+        OPEN, //0
+        CALCULATING //1
     }
 
     /**State Variables */
@@ -218,4 +218,4 @@ contract Raffle is VRFConsumerBaseV2 {
         return s_players[indexOfPlayer];
     }
 }
-//0550
+//0559
