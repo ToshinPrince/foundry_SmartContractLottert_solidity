@@ -163,6 +163,7 @@ contract RaffleTest is Test {
         raffleEnteredAndTimePassed
     {
         //Act
+        //getting requetsId from event
         vm.recordLogs();
         raffle.performUpkeep(""); //emit requestId
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -174,18 +175,48 @@ contract RaffleTest is Test {
         assert(uint256(rState) == 1);
     }
 
-    //fuzz test
     /////////////////////////
     //fulfillRandomWords  //
     ///////////////////////
-
-    function testFulfillRandomwordsCanOnlyBeCalledAfterPerformUpkeep(
+    //fuzz test
+    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
         uint256 randomRequestId
-    ) public {
+    ) public raffleEnteredAndTimePassed {
         //Arrange
         vm.expectRevert("nonexistent request");
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
             randomRequestId,
+            address(raffle)
+        );
+    }
+
+    function testFulfillRandomWordsPicksWinnerResetsAndSendMoney()
+        public
+        raffleEnteredAndTimePassed
+    {
+        //Arrange
+        uint256 additionalEntrants = 5;
+        uint256 startingIndex = 1;
+
+        for (
+            uint256 i = startingIndex;
+            i < additionalEntrants + startingIndex;
+            startingIndex++
+        ) {
+            address player = address(uint160(i)); //creating address - makeaddr("player", i)
+            hoax(player, 1 ether); // = vm.prank+vm.deal
+            raffle.enterRaffle{value: entranceFee}();
+        }
+
+        //getting requetsId from event
+        vm.recordLogs();
+        raffle.performUpkeep(""); //emit requestId
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        //Pretend to be chainlink to get random number
+        VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
+            uint256(requestId),
             address(raffle)
         );
     }
