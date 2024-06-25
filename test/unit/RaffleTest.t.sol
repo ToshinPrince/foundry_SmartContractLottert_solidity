@@ -190,6 +190,7 @@ contract RaffleTest is Test {
         );
     }
 
+    //issue
     function testFulfillRandomWordsPicksWinnerResetsAndSendMoney()
         public
         raffleEnteredAndTimePassed
@@ -201,12 +202,14 @@ contract RaffleTest is Test {
         for (
             uint256 i = startingIndex;
             i < additionalEntrants + startingIndex;
-            startingIndex++
+            i++
         ) {
             address player = address(uint160(i)); //creating address - makeaddr("player", i)
-            hoax(player, 1 ether); // = vm.prank+vm.deal
+            hoax(player, STARTING_USER_BALANCE); // = vm.prank+vm.deal
             raffle.enterRaffle{value: entranceFee}();
         }
+
+        uint256 prize = entranceFee * (additionalEntrants + 1);
 
         //getting requetsId from event
         vm.recordLogs();
@@ -214,10 +217,22 @@ contract RaffleTest is Test {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bytes32 requestId = entries[1].topics[1];
 
+        uint256 previousTimeStamp = raffle.getLastTimeStamp();
+
         //Pretend to be chainlink to get random number
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
             uint256(requestId),
             address(raffle)
+        );
+
+        // Assert
+        assert(uint256(raffle.getRaffleState()) == 0);
+        assert(raffle.getRecentWinner() != address(0));
+        assert(raffle.getLengthOfPlayers() == 0);
+        assert(previousTimeStamp < raffle.getLastTimeStamp());
+        assert(
+            raffle.getRecentWinner().balance ==
+                STARTING_USER_BALANCE + prize - entranceFee
         );
     }
 }
