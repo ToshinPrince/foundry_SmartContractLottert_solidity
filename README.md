@@ -92,3 +92,8 @@ $ cast --help
    1. Work on local chain.
    2. Forked Testnet.
    3. Forked Mainnet.
+
+## Issue
+
+1. subscriptionId - set up subscriptionId according to v2.5
+2. RaffleTest.sol - testFulfillRandomWordsPicksWinnerResetsAndSendMoney
