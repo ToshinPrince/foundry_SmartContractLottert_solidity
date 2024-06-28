@@ -96,4 +96,3 @@ $ cast --help
 ## Issue
 
 1. subscriptionId - set up subscriptionId according to v2.5
-2. RaffleTest.sol - testFulfillRandomWordsPicksWinnerResetsAndSendMoney
